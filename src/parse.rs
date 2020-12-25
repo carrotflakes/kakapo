@@ -77,6 +77,10 @@ fn parse_repeat(cs: &mut Peekable<impl Iterator<Item = char>>) -> Result<Ast, Er
                 cs.next();
                 Ast::Repeat(1, std::u32::MAX, Box::new(ast))
             }
+            Some('?') => {
+                cs.next();
+                Ast::Repeat(0, 1, Box::new(ast))
+            }
             Some(_) | None => ast,
         })
     } else {
