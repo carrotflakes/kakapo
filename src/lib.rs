@@ -5,6 +5,9 @@ mod parse;
 #[derive(Debug, Clone)]
 pub enum Ast {
     Char(char),
+    Range(char, char),
+    Any,
+    Not(Box<Ast>),
     Repeat(u32, u32, Box<Ast>),
     Concat(Vec<Ast>),
     Or(Vec<Ast>),
@@ -14,6 +17,23 @@ impl Ast {
     pub fn r#match(&self, chars: &mut Peekable<Chars>) -> bool {
         match self {
             Ast::Char(c) => chars.next() == Some(*c),
+            Ast::Range(c1, c2) => {
+                if let Some(c) = chars.next() {
+                    *c1 <= c && c <= *c2
+                } else {
+                    false
+                }
+            }
+            Ast::Any => {
+                if let Some(_) = chars.next() {
+                    true
+                } else {
+                    false
+                }
+            }
+            Ast::Not(ast) => {
+                !ast.r#match(&mut chars.clone())
+            }
             Ast::Repeat(min, max, ast) => {
                 let mut chars_prev = chars.clone();
                 for i in 0..*max {

@@ -66,6 +66,10 @@ fn parse_repeat(cs: &mut Peekable<impl Iterator<Item = char>>) -> Result<Ast, Er
                 }
                 ast
             }
+            '.' => {
+                cs.next();
+                Ast::Any
+            }
             _ => parse_char(cs)?,
         };
         Ok(match cs.peek() {
