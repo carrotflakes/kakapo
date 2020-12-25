@@ -102,6 +102,7 @@ fn parse_char_class(cs: &mut Peekable<impl Iterator<Item = char>>) -> Result<Ast
     //     asts.push(Ast::Char('-'));
     //     cs.next();
     // }
+    let invert = matches!(cs.peek(), Some('^'));
     loop {
         match cs.peek() {
             Some(']') => {
@@ -120,9 +121,14 @@ fn parse_char_class(cs: &mut Peekable<impl Iterator<Item = char>>) -> Result<Ast
             }
         }
     }
-    match asts.len() {
-        1 => Ok(asts.remove(0)),
-        _ => Ok(Ast::Or(asts)),
+    let ast = match asts.len() {
+        1 => asts.remove(0),
+        _ => Ast::Or(asts),
+    };
+    if invert {
+        Ok(Ast::Concat(vec![Ast::Not(Box::new(ast)), Ast::Any]))
+    } else {
+        Ok(ast)
     }
 }
 
