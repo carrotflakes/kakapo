@@ -98,10 +98,6 @@ fn parse_repeat(cs: &mut Peekable<impl Iterator<Item = char>>) -> Result<Ast, Er
 
 fn parse_char_class(cs: &mut Peekable<impl Iterator<Item = char>>) -> Result<Ast, Error> {
     let mut asts = Vec::new();
-    // if let Some('-') = cs.peek() {
-    //     asts.push(Ast::Char('-'));
-    //     cs.next();
-    // }
     let invert = matches!(cs.peek(), Some('^'));
     loop {
         match cs.peek() {
@@ -139,7 +135,21 @@ fn parse_char(cs: &mut Peekable<impl Iterator<Item = char>>) -> Result<Ast, Erro
 fn parse_char_(cs: &mut Peekable<impl Iterator<Item = char>>) -> Result<char, Error> {
     if let Some(c) = cs.peek().cloned() {
         cs.next();
-        Ok(c.clone())
+        if c == '\\' {
+            let c = match cs.peek() {
+                Some('r') => '\r',
+                Some('n') => '\n',
+                Some('t') => '\t',
+                Some('0') => '\0',
+                Some(_) | None => {
+                    return Err(Error::UnexpectedEOS);
+                }
+            };
+            cs.next();
+            Ok(c)
+        } else {
+            Ok(c.clone())
+        }
     } else {
         Err(Error::UnexpectedEOS)
     }
