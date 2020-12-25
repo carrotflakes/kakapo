@@ -18,4 +18,8 @@ fn main() {
     println!("{:?}", Regex::new(".").unwrap().r#match(""));
     println!("{:?}", Regex::new(".").unwrap().r#match("a"));
     println!("{:?}", Regex::new(".").unwrap().r#match("aa"));
+    println!("{:?}", Regex::new("[a-c]").unwrap().r#match("a"));
+    println!("{:?}", Regex::new("[a-c]").unwrap().r#match("b"));
+    println!("{:?}", Regex::new("[a-c]").unwrap().r#match("c"));
+    println!("{:?}", Regex::new("[a-c]").unwrap().r#match("d"));
 }

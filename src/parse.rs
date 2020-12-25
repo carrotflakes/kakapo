@@ -70,6 +70,10 @@ fn parse_repeat(cs: &mut Peekable<impl Iterator<Item = char>>) -> Result<Ast, Er
                 cs.next();
                 Ast::Any
             }
+            '[' => {
+                cs.next();
+                parse_char_class(cs)?
+            }
             _ => parse_char(cs)?,
         };
         Ok(match cs.peek() {
@@ -92,10 +96,44 @@ fn parse_repeat(cs: &mut Peekable<impl Iterator<Item = char>>) -> Result<Ast, Er
     }
 }
 
+fn parse_char_class(cs: &mut Peekable<impl Iterator<Item = char>>) -> Result<Ast, Error> {
+    let mut asts = Vec::new();
+    // if let Some('-') = cs.peek() {
+    //     asts.push(Ast::Char('-'));
+    //     cs.next();
+    // }
+    loop {
+        match cs.peek() {
+            Some(']') => {
+                cs.next();
+                break;
+            }
+            _ => {
+                let c = parse_char_(cs)?;
+                if let Some('-') = cs.peek() {
+                    cs.next();
+                    let c2 = parse_char_(cs)?;
+                    asts.push(Ast::Range(c, c2));
+                } else {
+                    asts.push(Ast::Char(c));
+                }
+            }
+        }
+    }
+    match asts.len() {
+        1 => Ok(asts.remove(0)),
+        _ => Ok(Ast::Or(asts)),
+    }
+}
+
 fn parse_char(cs: &mut Peekable<impl Iterator<Item = char>>) -> Result<Ast, Error> {
+    parse_char_(cs).map(|c| Ast::Char(c))
+}
+
+fn parse_char_(cs: &mut Peekable<impl Iterator<Item = char>>) -> Result<char, Error> {
     if let Some(c) = cs.peek().cloned() {
         cs.next();
-        Ok(Ast::Char(c.clone()))
+        Ok(c.clone())
     } else {
         Err(Error::UnexpectedEOS)
     }
