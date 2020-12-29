@@ -83,6 +83,22 @@ fn parse_repeat(cs: &mut Peekable<impl Iterator<Item = char>>) -> Result<Ast, Er
                 cs.next();
                 Ast::Repeat(0, 1, Box::new(ast))
             }
+            Some('{') => {
+                cs.next();
+                let min = if let Ok(n) = parse_number(cs) {
+                    n
+                } else {
+                    0
+                };
+                expect_char(cs, ',')?;
+                let max = if let Ok(n) = parse_number(cs) {
+                    n
+                } else {
+                    std::u32::MAX
+                };
+                expect_char(cs, '}')?;
+                Ast::Repeat(min, max, Box::new(ast))
+            }
             Some(_) | None => ast,
         })
     } else {
@@ -180,6 +196,38 @@ fn parse_char_(cs: &mut Peekable<impl Iterator<Item = char>>) -> Result<char, Er
         }
     } else {
         Err(Error::UnexpectedEOS)
+    }
+}
+
+fn parse_number(cs: &mut Peekable<impl Iterator<Item = char>>) -> Result<u32, Error> {
+    let mut n = 0;
+    let mut failed = true;
+    while let Some(c) = cs.peek() {
+        if let Some(d) = c.to_digit(10) {
+            n = d + n * 10;
+            failed = false;
+        } else {
+            if failed {
+                return Err(Error::UnexpectedChar(*c));
+            }
+            break;
+        }
+        cs.next();
+    }
+    Ok(n)
+}
+
+fn expect_char(cs: &mut Peekable<impl Iterator<Item = char>>, char: char) -> Result<(), Error> {
+    match cs.next() {
+        Some(c) if c == char => {
+            Ok(())
+        }
+        Some(c) => {
+            Err(Error::UnexpectedChar(c))
+        }
+        None => {
+            Err(Error::UnexpectedEOS)
+        }
     }
 }
 

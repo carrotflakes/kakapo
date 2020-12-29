@@ -30,4 +30,10 @@ fn main() {
     println!("{:?}", Regex::new("\\n").unwrap().r#match("\n"));
     println!("{:?}", Regex::new("(abc)").unwrap().r#match("abc"));
     println!("{:?}", Regex::new("(?=a)(.+)").unwrap().r#match("abc"));
+    println!("{:?}", Regex::new("a{,}").unwrap().r#match(""));
+    println!("{:?}", Regex::new("a{,}").unwrap().r#match("a"));
+    println!("{:?}", Regex::new("a{,}").unwrap().r#match("aa"));
+    println!("{:?}", Regex::new("a{1,1}").unwrap().r#match(""));
+    println!("{:?}", Regex::new("a{1,1}").unwrap().r#match("a"));
+    println!("{:?}", Regex::new("a{1,1}").unwrap().r#match("aa"));
 }
