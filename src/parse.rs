@@ -58,13 +58,7 @@ fn parse_repeat(cs: &mut Peekable<impl Iterator<Item = char>>) -> Result<Ast, Er
             }
             '(' => {
                 cs.next();
-                let ast = parse_or(cs)?;
-                if let Some(')') = cs.peek() {
-                    cs.next();
-                } else {
-                    return Err(Error::UnexpectedChar(cs.peek().unwrap().clone()));
-                }
-                ast
+                parse_paren(cs)?
             }
             '.' => {
                 cs.next();
@@ -94,6 +88,32 @@ fn parse_repeat(cs: &mut Peekable<impl Iterator<Item = char>>) -> Result<Ast, Er
     } else {
         Err(Error::UnexpectedEOS)
     }
+}
+
+fn parse_paren(cs: &mut Peekable<impl Iterator<Item = char>>) -> Result<Ast, Error> {
+    let ast = if cs.peek() == Some(&'?') {
+        cs.next();
+        match cs.peek() {
+            Some(':') => {
+                cs.next();
+                parse_or(cs)?
+            }
+            Some(c) => {
+                return Err(Error::UnexpectedChar(*c));
+            }
+            None => {
+                return Err(Error::UnexpectedEOS);
+            }
+        }
+    } else {
+        Ast::Capture(Box::new(parse_or(cs)?))
+    };
+    if let Some(')') = cs.peek() {
+        cs.next();
+    } else {
+        return Err(Error::UnexpectedChar(cs.peek().unwrap().clone()));
+    }
+    Ok(ast)
 }
 
 fn parse_char_class(cs: &mut Peekable<impl Iterator<Item = char>>) -> Result<Ast, Error> {
