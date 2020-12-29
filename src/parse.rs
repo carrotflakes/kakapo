@@ -173,6 +173,24 @@ fn parse_char_class(cs: &mut Peekable<impl Iterator<Item = char>>) -> Result<Ast
 }
 
 fn parse_char(cs: &mut Peekable<impl Iterator<Item = char>>) -> Result<Ast, Error> {
+    if matches!(cs.peek(), Some('\\')) {
+        cs.next();
+        return match cs.next() {
+            Some('r') => Ok(Ast::Char('\r')),
+            Some('n') => Ok(Ast::Char('\n')),
+            Some('t') => Ok(Ast::Char('\t')),
+            Some('0') => Ok(Ast::Char('\0')),
+            Some('d') => {
+                Ok(Ast::Range('0', '9'))
+            }
+            Some(c) => {
+                Err(Error::UnexpectedChar(c))
+            }
+            None => {
+                Err(Error::UnexpectedEOS)
+            }
+        };
+    }
     parse_char_(cs).map(|c| Ast::Char(c))
 }
 

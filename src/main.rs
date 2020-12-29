@@ -36,4 +36,5 @@ fn main() {
     println!("{:?}", Regex::new("a{1,1}").unwrap().r#match(""));
     println!("{:?}", Regex::new("a{1,1}").unwrap().r#match("a"));
     println!("{:?}", Regex::new("a{1,1}").unwrap().r#match("aa"));
+    println!("{:?}", Regex::new("\\d+").unwrap().r#match("0123456789"));
 }
