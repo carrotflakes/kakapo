@@ -29,4 +29,5 @@ fn main() {
     println!("{:?}", Regex::new("[^a-c]").unwrap().r#match("d"));
     println!("{:?}", Regex::new("\\n").unwrap().r#match("\n"));
     println!("{:?}", Regex::new("(abc)").unwrap().r#match("abc"));
+    println!("{:?}", Regex::new("(?=a)(.+)").unwrap().r#match("abc"));
 }

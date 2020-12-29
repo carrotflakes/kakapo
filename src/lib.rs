@@ -12,6 +12,7 @@ pub enum Ast {
     Repeat(u32, u32, Box<Ast>),
     Concat(Vec<Ast>),
     Or(Vec<Ast>),
+    Lookahead(Box<Ast>),
     Capture(Box<Ast>),
 }
 
@@ -65,6 +66,7 @@ impl Ast {
                 }
                 false
             }
+            Ast::Lookahead(_) => {todo!()}
             Ast::Capture(_) => {todo!()}
         }
     }
@@ -136,6 +138,9 @@ impl<'a> Runtime<'a> {
                     }
                 }
                 false
+            }
+            Ast::Lookahead(ast) => {
+                self.child().run(ast)
             }
             Ast::Capture(ast) => {
                 let begin = self.chars.as_str();

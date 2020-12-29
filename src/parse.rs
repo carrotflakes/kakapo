@@ -98,6 +98,14 @@ fn parse_paren(cs: &mut Peekable<impl Iterator<Item = char>>) -> Result<Ast, Err
                 cs.next();
                 parse_or(cs)?
             }
+            Some('=') => {
+                cs.next();
+                Ast::Lookahead(Box::new(parse_or(cs)?))
+            }
+            Some('!') => {
+                cs.next();
+                Ast::Not(Box::new(parse_or(cs)?))
+            }
             Some(c) => {
                 return Err(Error::UnexpectedChar(*c));
             }
